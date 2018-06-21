@@ -23,7 +23,10 @@ validString =
         |> conditional
             { retries = 100
             , fallback = (++) "val@idsT1n" << String.right 90
-            , condition = Regex.contains <| Regex.regex <| Regex.escape "^(?=.*?[A-Z])(?=.*?[!\"#$%&'()*+,-./\\:;?@[]^_`{|}~]).{7,100}"
+            , condition =
+                Regex.escape "^(?=.*?[A-Z])(?=.*?[!\"#$%&'()*+,-./\\:;?@[]^_`{|}~]).{7,100}"
+                    |> Regex.regex
+                    |> Regex.contains
             }
 
 
