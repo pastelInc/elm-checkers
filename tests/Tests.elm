@@ -205,14 +205,22 @@ suite =
                 \str ->
                     let
                         policy =
-                            Validator.required << Validator.gte "7" << Validator.lte "100" << Validator.mixSpecial << Validator.mixUppercase
+                            Validator.required
+                                << Validator.gte "7"
+                                << Validator.lte "100"
+                                << Validator.mixSpecial
+                                << Validator.mixUppercase
                     in
                     Expect.true "Expect to valid" (validateString policy str)
             , test "return invalid" <|
                 \_ ->
                     let
                         policy =
-                            Validator.required << Validator.gte "7" << Validator.lte "100" << Validator.mixSpecial << Validator.mixUppercase
+                            Validator.required
+                                << Validator.gte "7"
+                                << Validator.lte "100"
+                                << Validator.mixSpecial
+                                << Validator.mixUppercase
                     in
                     Expect.false "Expect to invalid" (validateString policy "validsT1n")
             ]

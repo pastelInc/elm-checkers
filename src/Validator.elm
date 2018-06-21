@@ -42,7 +42,7 @@ import Regex
 type Validator
     = Validator
         { isValid : Bool
-        , input : Attribute
+        , attr : Attribute
         }
 
 
@@ -53,19 +53,19 @@ type Attribute
 
 {-| -}
 string : String -> Validator
-string input =
+string attr =
     Validator
         { isValid = True
-        , input = String_ input
+        , attr = String_ attr
         }
 
 
 {-| -}
 int : Int -> Validator
-int input =
+int attr =
     Validator
         { isValid = True
-        , input = Integer input
+        , attr = Integer attr
         }
 
 
@@ -82,7 +82,7 @@ validate operator =
 
 {-| -}
 required : Validator -> Validator
-required ((Validator { input }) as validator) =
+required ((Validator { attr }) as validator) =
     update requiredOp validator
 
 
@@ -97,11 +97,11 @@ requiredOp attr =
 
 
 update : (Attribute -> Bool) -> Validator -> Validator
-update op ((Validator { isValid, input }) as validator) =
+update op ((Validator { isValid, attr }) as validator) =
     if isValid then
         Validator
-            { isValid = op input
-            , input = input
+            { isValid = op attr
+            , attr = attr
             }
     else
         validator
