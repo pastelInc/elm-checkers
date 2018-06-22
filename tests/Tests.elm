@@ -7,12 +7,12 @@ import Test exposing (..)
 import Validator
 
 
-validateString : (Validator.Validator -> Validator.Validator) -> String -> Bool
+validateString : (Validator.ValidatableInput -> Validator.ValidatableInput) -> String -> Bool
 validateString validator =
     Validator.validate validator << Validator.string
 
 
-validateInt : (Validator.Validator -> Validator.Validator) -> Int -> Bool
+validateInt : (Validator.ValidatableInput -> Validator.ValidatableInput) -> Int -> Bool
 validateInt validator =
     Validator.validate validator << Validator.int
 

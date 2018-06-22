@@ -1,6 +1,6 @@
 module Validator
     exposing
-        ( Validator
+        ( ValidatableInput
         , gte
         , int
         , lte
@@ -14,33 +14,32 @@ module Validator
         , validate
         )
 
-{-| This module can be combined some validators.
+{-| This module can be combined some validations.
 
-@docs Validator
-@docs int
-@docs string
+
+# Create
+
+@docs ValidatableInput, int, string
+
+
+# Use
+
 @docs validate
 
 
-# Common validators
+# Common validations
 
-@docs gte
-@docs lte
-@docs mixAlpha
-@docs mixLowercase
-@docs mixNumeric
-@docs mixSpecial
-@docs mixUppercase
-@docs required
+@docs gte, lte, mixAlpha, mixLowercase, mixNumeric, mixSpecial, mixUppercase, required
 
 -}
 
 import Regex
 
 
-{-| -}
-type Validator
-    = Validator
+{-| A validatable input
+-}
+type ValidatableInput
+    = ValidatableInput
         { isValid : Bool
         , attr : Attribute
         }
@@ -51,43 +50,54 @@ type Attribute
     | Integer Int
 
 
-{-| -}
-string : String -> Validator
+{-| Create a valid input from string
+-}
+string : String -> ValidatableInput
 string attr =
-    Validator
+    ValidatableInput
         { isValid = True
         , attr = String_ attr
         }
 
 
-{-| -}
-int : Int -> Validator
+{-| Create a valid input from integer
+-}
+int : Int -> ValidatableInput
 int attr =
-    Validator
+    ValidatableInput
         { isValid = True
         , attr = Integer attr
         }
 
 
-isValid : Validator -> Bool
-isValid (Validator { isValid }) =
+isValid : ValidatableInput -> Bool
+isValid (ValidatableInput { isValid }) =
     isValid
 
 
-{-| -}
-validate : (Validator -> Validator) -> Validator -> Bool
+{-| Validate the input.
+
+    input = string "Tom"
+
+    validate required input == True
+    validate mixNumeric input == False
+    validate (required << mixNumeric) input == False
+
+-}
+validate : (ValidatableInput -> ValidatableInput) -> ValidatableInput -> Bool
 validate operator =
     isValid << operator
 
 
-{-| -}
-required : Validator -> Validator
-required ((Validator { attr }) as validator) =
-    update requiredOp validator
+{-| Validate whether there is input.
+-}
+required : ValidatableInput -> ValidatableInput
+required input =
+    update requiredValidator input
 
 
-requiredOp : Attribute -> Bool
-requiredOp attr =
+requiredValidator : Attribute -> Bool
+requiredValidator attr =
     case attr of
         String_ str ->
             (not << String.isEmpty << String.trim) str
@@ -96,30 +106,31 @@ requiredOp attr =
             True
 
 
-update : (Attribute -> Bool) -> Validator -> Validator
-update op ((Validator { isValid, attr }) as validator) =
+update : (Attribute -> Bool) -> ValidatableInput -> ValidatableInput
+update op ((ValidatableInput { isValid, attr }) as validation) =
     if isValid then
-        Validator
+        ValidatableInput
             { isValid = op attr
             , attr = attr
             }
     else
-        validator
+        validation
 
 
-{-| -}
-gte : String -> Validator -> Validator
-gte str validator =
+{-| Validate if input is greater than or equal arbitrary value.
+-}
+gte : String -> ValidatableInput -> ValidatableInput
+gte str validation =
     case String.toInt str of
         Ok n ->
-            update (gteOp n) validator
+            update (gteValidator n) validation
 
         Err _ ->
-            update (\_ -> False) validator
+            update (\_ -> False) validation
 
 
-gteOp : Int -> Attribute -> Bool
-gteOp x y =
+gteValidator : Int -> Attribute -> Bool
+gteValidator x y =
     case y of
         String_ strY ->
             x <= String.length strY
@@ -128,19 +139,20 @@ gteOp x y =
             x <= intY
 
 
-{-| -}
-lte : String -> Validator -> Validator
-lte str validator =
+{-| Validate if input is less than or equal arbitrary value.
+-}
+lte : String -> ValidatableInput -> ValidatableInput
+lte str validation =
     case String.toInt str of
         Ok n ->
-            update (lteOp n) validator
+            update (lteValidator n) validation
 
         Err _ ->
-            update (\_ -> False) validator
+            update (\_ -> False) validation
 
 
-lteOp : Int -> Attribute -> Bool
-lteOp x y =
+lteValidator : Int -> Attribute -> Bool
+lteValidator x y =
     case y of
         String_ strY ->
             x >= String.length strY
@@ -150,43 +162,43 @@ lteOp x y =
 
 
 {-| -}
-mixAlpha : Validator -> Validator
-mixAlpha validator =
-    mix (Regex.regex "[a-zA-Z]+") validator
+mixAlpha : ValidatableInput -> ValidatableInput
+mixAlpha validation =
+    mix (Regex.regex "[a-zA-Z]+") validation
 
 
 {-| -}
-mixNumeric : Validator -> Validator
-mixNumeric validator =
-    mix (Regex.regex "\\d+") validator
+mixNumeric : ValidatableInput -> ValidatableInput
+mixNumeric validation =
+    mix (Regex.regex "\\d+") validation
 
 
 {-| -}
-mixSpecial : Validator -> Validator
-mixSpecial validator =
-    mix (Regex.regex <| "[" ++ Regex.escape "!\"#$%&'()*+,-./\\:;?@[]^_`{|}~" ++ "]+") validator
+mixSpecial : ValidatableInput -> ValidatableInput
+mixSpecial validation =
+    mix (Regex.regex <| "[" ++ Regex.escape "!\"#$%&'()*+,-./\\:;?@[]^_`{|}~" ++ "]+") validation
 
 
 {-| -}
-mixLowercase : Validator -> Validator
-mixLowercase validator =
-    mix (Regex.regex "[a-z]+") validator
+mixLowercase : ValidatableInput -> ValidatableInput
+mixLowercase validation =
+    mix (Regex.regex "[a-z]+") validation
 
 
 {-| -}
-mixUppercase : Validator -> Validator
-mixUppercase validator =
-    mix (Regex.regex "[A-Z]+") validator
+mixUppercase : ValidatableInput -> ValidatableInput
+mixUppercase validation =
+    mix (Regex.regex "[A-Z]+") validation
 
 
 {-| -}
-mix : Regex.Regex -> Validator -> Validator
-mix regex validator =
-    update (mixOp regex) validator
+mix : Regex.Regex -> ValidatableInput -> ValidatableInput
+mix regex validation =
+    update (mixValidator regex) validation
 
 
-mixOp : Regex.Regex -> Attribute -> Bool
-mixOp regex attr =
+mixValidator : Regex.Regex -> Attribute -> Bool
+mixValidator regex attr =
     case attr of
         String_ str ->
             Regex.contains regex str
