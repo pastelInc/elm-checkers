@@ -40,35 +40,45 @@ suite =
                         policy =
                             Validator.gte "7"
                     in
-                    Expect.true "Expect to be greater than 7" (validateInt policy 8)
+                    Expect.equal
+                        True
+                        (validateInt policy 8)
             , test "returns valid validator if it's greater than given string" <|
                 \_ ->
                     let
                         policy =
                             Validator.gte "-1"
                     in
-                    Expect.true "Expect to be greater than -1" (validateString policy "y")
+                    Expect.equal
+                        True
+                        (validateString policy "y")
             , test "returns valid validator if it's equal to given string" <|
                 \_ ->
                     let
                         policy =
                             Validator.gte "1"
                     in
-                    Expect.true "Expect to be equal to 1" (validateString policy "x")
+                    Expect.equal
+                        True
+                        (validateString policy "x")
             , test "returns invalid validator if it's less than given number" <|
                 \_ ->
                     let
                         policy =
                             Validator.gte "7"
                     in
-                    Expect.false "Expect to be less than 7" (validateInt policy 5)
+                    Expect.equal
+                        False
+                        (validateInt policy 5)
             , test "returns invalid validator if it's less than given string" <|
                 \_ ->
                     let
                         policy =
                             Validator.gte "7"
                     in
-                    Expect.false "Expect to be less than 7" (validateString policy "x")
+                    Expect.equal
+                        False
+                        (validateString policy "x")
             ]
         , describe "Validator.lte"
             [ test "returns valid validator if it's less than given number" <|
@@ -77,35 +87,45 @@ suite =
                         policy =
                             Validator.lte "7"
                     in
-                    Expect.true "Expect to be less than 7" (validateInt policy 6)
+                    Expect.equal
+                        True
+                        (validateInt policy 6)
             , test "returns valid validator if it's less than given string" <|
                 \_ ->
                     let
                         policy =
                             Validator.lte "5"
                     in
-                    Expect.true "Expect to be less than 5" (validateString policy "x")
+                    Expect.equal
+                        True
+                        (validateString policy "x")
             , test "returns valid validator if it's equal to given string" <|
                 \_ ->
                     let
                         policy =
                             Validator.lte "1"
                     in
-                    Expect.true "Expect to be equal to 1" (validateString policy "x")
+                    Expect.equal
+                        True
+                        (validateString policy "x")
             , test "returns invalid validator if it's greater than given number" <|
                 \_ ->
                     let
                         policy =
                             Validator.lte "-1"
                     in
-                    Expect.false "Expect to be greater than -1" (validateInt policy 8)
+                    Expect.equal
+                        False
+                        (validateInt policy 8)
             , test "returns invalid validator if it's greater than given string" <|
                 \_ ->
                     let
                         policy =
                             Validator.lte "-1"
                     in
-                    Expect.false "Expect to be greater than -1" (validateString policy "y")
+                    Expect.equal
+                        False
+                        (validateString policy "y")
             ]
         , describe "Validator.mixAlpha"
             [ test "returns valid validator if it contains alphabet" <|
@@ -114,14 +134,18 @@ suite =
                         policy =
                             Validator.mixAlpha
                     in
-                    Expect.true "Expect to contain alphabet" (validateString policy "a1b2C")
+                    Expect.equal
+                        True
+                        (validateString policy "a1b2C")
             , test "returns invalid validator if it does not contain alphabet" <|
                 \_ ->
                     let
                         policy =
                             Validator.mixAlpha
                     in
-                    Expect.false "Expect not to contain alphabet" (validateString policy "765")
+                    Expect.equal
+                        False
+                        (validateString policy "765")
             ]
         , describe "Validator.mixLowercase"
             [ test "returns valid validator if it contains lowercase" <|
@@ -130,14 +154,18 @@ suite =
                         policy =
                             Validator.mixLowercase
                     in
-                    Expect.true "Expect to contain lowercase" (validateString policy "a1b2C")
+                    Expect.equal
+                        True
+                        (validateString policy "a1b2C")
             , test "returns invalid validator if it does not contain lowercase" <|
                 \_ ->
                     let
                         policy =
                             Validator.mixLowercase
                     in
-                    Expect.false "Expect not to contain lowercase" (validateString policy "A1B2C")
+                    Expect.equal
+                        False
+                        (validateString policy "A1B2C")
             ]
         , describe "Validator.mixUppercase"
             [ test "returns valid validator if it contains uppercase" <|
@@ -146,14 +174,18 @@ suite =
                         policy =
                             Validator.mixUppercase
                     in
-                    Expect.true "Expect to contain uppercase" (validateString policy "a1b2C")
+                    Expect.equal
+                        True
+                        (validateString policy "a1b2C")
             , test "returns invalid validator if it does not contain uppercase" <|
                 \_ ->
                     let
                         policy =
                             Validator.mixUppercase
                     in
-                    Expect.false "Expect not to contain uppercase" (validateString policy "a1b2c")
+                    Expect.equal
+                        False
+                        (validateString policy "a1b2c")
             ]
         , describe "Validator.mixNumeric"
             [ test "returns valid validator if it contains numeric" <|
@@ -162,14 +194,18 @@ suite =
                         policy =
                             Validator.mixNumeric
                     in
-                    Expect.true "Expect to contain numeric" (validateString policy "a1b2C")
+                    Expect.equal
+                        True
+                        (validateString policy "a1b2C")
             , test "returns invalid validator if it does not contain numeric" <|
                 \_ ->
                     let
                         policy =
                             Validator.mixNumeric
                     in
-                    Expect.false "Expect not to contain numeric" (validateString policy "abc")
+                    Expect.equal
+                        False
+                        (validateString policy "abc")
             ]
         , describe "Validator.mixSpecial"
             [ test "returns valid validator if it contains special characters" <|
@@ -178,14 +214,18 @@ suite =
                         policy =
                             Validator.mixSpecial
                     in
-                    Expect.true "Expect to contain special characters" (validateString policy "a[1@b2\"C")
+                    Expect.equal
+                        True
+                        (validateString policy "a[1@b2\"C")
             , test "returns invalid validator if it does not contain special characters" <|
                 \_ ->
                     let
                         policy =
                             Validator.mixSpecial
                     in
-                    Expect.false "Expect not to contain special characters" (validateString policy "a b c")
+                    Expect.equal
+                        False
+                        (validateString policy "a b c")
             ]
         , describe "Validator.required"
             [ test "returns valid validator if it contains some characters" <|
@@ -194,14 +234,18 @@ suite =
                         policy =
                             Validator.required
                     in
-                    Expect.true "Expect to contain some characters" (validateString policy "a")
+                    Expect.equal
+                        True
+                        (validateString policy "a")
             , test "returns invalid validator if it does not contain some characters" <|
                 \_ ->
                     let
                         policy =
                             Validator.required
                     in
-                    Expect.false "Expect not to contain some characters" (validateString policy " ")
+                    Expect.equal
+                        False
+                        (validateString policy " ")
             ]
         , describe "combine validators"
             [ fuzz validString "return valid" <|
@@ -214,7 +258,9 @@ suite =
                                 << Validator.mixSpecial
                                 << Validator.mixUppercase
                     in
-                    Expect.true "Expect to valid" (validateString policy str)
+                    Expect.equal
+                        True
+                        (validateString policy str)
             , test "return invalid" <|
                 \_ ->
                     let
@@ -225,6 +271,8 @@ suite =
                                 << Validator.mixSpecial
                                 << Validator.mixUppercase
                     in
-                    Expect.false "Expect to invalid" (validateString policy "validsT1n")
+                    Expect.equal
+                        False
+                        (validateString policy "validsT1n")
             ]
         ]
