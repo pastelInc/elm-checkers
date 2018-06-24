@@ -39,40 +39,32 @@ import Regex
 {-| A validatable input
 -}
 type ValidatableInput
-    = ValidatableInput
-        { isValid : Bool
-        , attr : Attribute
-        }
-
-
-type Attribute
-    = String_ String
-    | Integer Int
+    = ValidatableString Bool String
+    | ValidatableInt Bool Int
 
 
 {-| Create a valid input from string
 -}
 string : String -> ValidatableInput
-string attr =
-    ValidatableInput
-        { isValid = True
-        , attr = String_ attr
-        }
+string input =
+    ValidatableString True input
 
 
 {-| Create a valid input from integer
 -}
 int : Int -> ValidatableInput
-int attr =
-    ValidatableInput
-        { isValid = True
-        , attr = Integer attr
-        }
+int input =
+    ValidatableInt True input
 
 
 isValid : ValidatableInput -> Bool
-isValid (ValidatableInput { isValid }) =
-    isValid
+isValid input =
+    case input of
+        ValidatableString isValid _ ->
+            isValid
+
+        ValidatableInt isValid _ ->
+            isValid
 
 
 {-| Validate the input.
@@ -96,25 +88,30 @@ required input =
     update requiredValidator input
 
 
-requiredValidator : Attribute -> Bool
-requiredValidator attr =
-    case attr of
-        String_ str ->
+requiredValidator : ValidatableInput -> Bool
+requiredValidator input =
+    case input of
+        ValidatableString _ str ->
             (not << String.isEmpty << String.trim) str
 
         _ ->
             True
 
 
-update : (Attribute -> Bool) -> ValidatableInput -> ValidatableInput
-update op ((ValidatableInput { isValid, attr }) as validation) =
-    if isValid then
-        ValidatableInput
-            { isValid = op attr
-            , attr = attr
-            }
-    else
-        validation
+update : (ValidatableInput -> Bool) -> ValidatableInput -> ValidatableInput
+update op input =
+    case input of
+        ValidatableString isValid val ->
+            if isValid then
+                ValidatableString (op input) val
+            else
+                input
+
+        ValidatableInt isValid val ->
+            if isValid then
+                ValidatableInt (op input) val
+            else
+                input
 
 
 {-| Validate if input is greater than or equal arbitrary value.
@@ -129,13 +126,13 @@ gte str validation =
             update (\_ -> False) validation
 
 
-gteValidator : Int -> Attribute -> Bool
+gteValidator : Int -> ValidatableInput -> Bool
 gteValidator x y =
     case y of
-        String_ strY ->
+        ValidatableString _ strY ->
             x <= String.length strY
 
-        Integer intY ->
+        ValidatableInt _ intY ->
             x <= intY
 
 
@@ -151,13 +148,13 @@ lte str validation =
             update (\_ -> False) validation
 
 
-lteValidator : Int -> Attribute -> Bool
+lteValidator : Int -> ValidatableInput -> Bool
 lteValidator x y =
     case y of
-        String_ strY ->
+        ValidatableString _ strY ->
             x >= String.length strY
 
-        Integer intY ->
+        ValidatableInt _ intY ->
             x >= intY
 
 
@@ -197,10 +194,10 @@ mix regex validation =
     update (mixValidator regex) validation
 
 
-mixValidator : Regex.Regex -> Attribute -> Bool
-mixValidator regex attr =
-    case attr of
-        String_ str ->
+mixValidator : Regex.Regex -> ValidatableInput -> Bool
+mixValidator regex input =
+    case input of
+        ValidatableString _ str ->
             Regex.contains regex str
 
         _ ->
