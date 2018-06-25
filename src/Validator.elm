@@ -1,8 +1,8 @@
 module Validator
     exposing
         ( ValidatableInput
+        , from
         , gte
-        , int
         , lte
         , mixAlpha
         , mixLowercase
@@ -10,7 +10,6 @@ module Validator
         , mixSpecial
         , mixUppercase
         , required
-        , string
         , validate
         )
 
@@ -19,7 +18,7 @@ module Validator
 
 # Create
 
-@docs ValidatableInput, int, string
+@docs ValidatableInput, from
 
 
 # Use
@@ -38,45 +37,32 @@ import Regex
 
 {-| A validatable input
 -}
-type ValidatableInput
-    = ValidatableString Bool String
-    | ValidatableInt Bool Int
+type ValidatableInput a
+    = ValidatableInput Bool a
 
 
-{-| Create a valid input from string
+{-| Create a valid input from val
 -}
-string : String -> ValidatableInput
-string input =
-    ValidatableString True input
+from : a -> ValidatableInput a
+from val =
+    ValidatableInput True val
 
 
-{-| Create a valid input from integer
--}
-int : Int -> ValidatableInput
-int input =
-    ValidatableInt True input
-
-
-isValid : ValidatableInput -> Bool
-isValid input =
-    case input of
-        ValidatableString isValid _ ->
-            isValid
-
-        ValidatableInt isValid _ ->
-            isValid
+isValid : ValidatableInput a -> Bool
+isValid (ValidatableInput isValid val) =
+    isValid
 
 
 {-| Validate the input.
 
-    input = string "Haruka"
+    input = from "Haruka"
 
     validate required input == True
     validate mixNumeric input == False
     validate (required << mixNumeric) input == False
 
 -}
-validate : (ValidatableInput -> ValidatableInput) -> ValidatableInput -> Bool
+validate : (ValidatableInput a -> ValidatableInput a) -> ValidatableInput a -> Bool
 validate operator =
     isValid << operator
 
@@ -92,35 +78,22 @@ validate operator =
     validate required empty == False
 
 -}
-required : ValidatableInput -> ValidatableInput
+required : ValidatableInput String -> ValidatableInput String
 required input =
     update requiredValidator input
 
 
-requiredValidator : ValidatableInput -> Bool
+requiredValidator : String -> Bool
 requiredValidator input =
-    case input of
-        ValidatableString _ str ->
-            (not << String.isEmpty << String.trim) str
-
-        _ ->
-            True
+    (not << String.isEmpty << String.trim) input
 
 
-update : (ValidatableInput -> Bool) -> ValidatableInput -> ValidatableInput
-update op input =
-    case input of
-        ValidatableString isValid val ->
-            if isValid then
-                ValidatableString (op input) val
-            else
-                input
-
-        ValidatableInt isValid val ->
-            if isValid then
-                ValidatableInt (op input) val
-            else
-                input
+update : (a -> Bool) -> ValidatableInput a -> ValidatableInput a
+update op ((ValidatableInput isValid val) as input) =
+    if isValid then
+        ValidatableInput (op val) val
+    else
+        input
 
 
 {-| Validate if input is greater than or equal arbitrary value.
@@ -134,24 +107,14 @@ update op input =
     validate (gte "20") 17 == False
 
 -}
-gte : String -> ValidatableInput -> ValidatableInput
-gte str input =
-    case String.toInt str of
-        Ok n ->
-            update (gteValidator n) input
-
-        Err _ ->
-            update (\_ -> False) input
+gte : Int -> ValidatableInput String -> ValidatableInput String
+gte n input =
+    update (gteValidator n) input
 
 
-gteValidator : Int -> ValidatableInput -> Bool
-gteValidator x y =
-    case y of
-        ValidatableString _ strY ->
-            x <= String.length strY
-
-        ValidatableInt _ intY ->
-            x <= intY
+gteValidator : Int -> String -> Bool
+gteValidator x input =
+    x <= String.length input
 
 
 {-| Validate if input is less than or equal arbitrary value.
@@ -165,24 +128,14 @@ gteValidator x y =
     validate (lte "-20") 17 == False
 
 -}
-lte : String -> ValidatableInput -> ValidatableInput
-lte str input =
-    case String.toInt str of
-        Ok n ->
-            update (lteValidator n) input
-
-        Err _ ->
-            update (\_ -> False) input
+lte : Int -> ValidatableInput String -> ValidatableInput String
+lte n input =
+    update (lteValidator n) input
 
 
-lteValidator : Int -> ValidatableInput -> Bool
-lteValidator x y =
-    case y of
-        ValidatableString _ strY ->
-            x >= String.length strY
-
-        ValidatableInt _ intY ->
-            x >= intY
+lteValidator : Int -> String -> Bool
+lteValidator x input =
+    x >= String.length input
 
 
 {-| Validate if input contains alphabets.
@@ -194,7 +147,7 @@ lteValidator x y =
     validate mixAlpha age == False
 
 -}
-mixAlpha : ValidatableInput -> ValidatableInput
+mixAlpha : ValidatableInput String -> ValidatableInput String
 mixAlpha input =
     mix (Regex.regex "[a-zA-Z]+") input
 
@@ -208,7 +161,7 @@ mixAlpha input =
     validate mixNumeric invalidEmail == False
 
 -}
-mixNumeric : ValidatableInput -> ValidatableInput
+mixNumeric : ValidatableInput String -> ValidatableInput String
 mixNumeric input =
     mix (Regex.regex "\\d+") input
 
@@ -222,7 +175,7 @@ mixNumeric input =
     validate mixSpecial age == False
 
 -}
-mixSpecial : ValidatableInput -> ValidatableInput
+mixSpecial : ValidatableInput String -> ValidatableInput String
 mixSpecial input =
     mix (Regex.regex <| "[" ++ Regex.escape "!\"#$%&'()*+,-./\\:;?@[]^_`{|}~" ++ "]+") input
 
@@ -236,7 +189,7 @@ mixSpecial input =
     validate mixLowercase invalidEmail == False
 
 -}
-mixLowercase : ValidatableInput -> ValidatableInput
+mixLowercase : ValidatableInput String -> ValidatableInput String
 mixLowercase input =
     mix (Regex.regex "[a-z]+") input
 
@@ -250,21 +203,16 @@ mixLowercase input =
     validate mixUppercase invalidEmail == False
 
 -}
-mixUppercase : ValidatableInput -> ValidatableInput
+mixUppercase : ValidatableInput String -> ValidatableInput String
 mixUppercase input =
     mix (Regex.regex "[A-Z]+") input
 
 
-mix : Regex.Regex -> ValidatableInput -> ValidatableInput
+mix : Regex.Regex -> ValidatableInput String -> ValidatableInput String
 mix regex input =
     update (mixValidator regex) input
 
 
-mixValidator : Regex.Regex -> ValidatableInput -> Bool
+mixValidator : Regex.Regex -> String -> Bool
 mixValidator regex input =
-    case input of
-        ValidatableString _ str ->
-            Regex.contains regex str
-
-        _ ->
-            False
+    Regex.contains regex input

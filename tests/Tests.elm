@@ -7,14 +7,9 @@ import Test exposing (..)
 import Validator
 
 
-validateString : (Validator.ValidatableInput -> Validator.ValidatableInput) -> String -> Bool
+validateString : (Validator.ValidatableInput String -> Validator.ValidatableInput String) -> String -> Bool
 validateString validator =
-    Validator.validate validator << Validator.string
-
-
-validateInt : (Validator.ValidatableInput -> Validator.ValidatableInput) -> Int -> Bool
-validateInt validator =
-    Validator.validate validator << Validator.int
+    Validator.validate validator << Validator.from
 
 
 validString : Fuzzer String
@@ -34,20 +29,11 @@ suite : Test
 suite =
     describe "The Validator module"
         [ describe "Validator.gte"
-            [ test "returns valid validator if it's greater than given number" <|
+            [ test "returns valid validator if it's greater than given string" <|
                 \_ ->
                     let
                         policy =
-                            Validator.gte "7"
-                    in
-                    Expect.equal
-                        True
-                        (validateInt policy 8)
-            , test "returns valid validator if it's greater than given string" <|
-                \_ ->
-                    let
-                        policy =
-                            Validator.gte "-1"
+                            Validator.gte -1
                     in
                     Expect.equal
                         True
@@ -56,45 +42,27 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.gte "1"
+                            Validator.gte 1
                     in
                     Expect.equal
                         True
                         (validateString policy "x")
-            , test "returns invalid validator if it's less than given number" <|
-                \_ ->
-                    let
-                        policy =
-                            Validator.gte "7"
-                    in
-                    Expect.equal
-                        False
-                        (validateInt policy 5)
             , test "returns invalid validator if it's less than given string" <|
                 \_ ->
                     let
                         policy =
-                            Validator.gte "7"
+                            Validator.gte 7
                     in
                     Expect.equal
                         False
                         (validateString policy "x")
             ]
         , describe "Validator.lte"
-            [ test "returns valid validator if it's less than given number" <|
+            [ test "returns valid validator if it's less than given string" <|
                 \_ ->
                     let
                         policy =
-                            Validator.lte "7"
-                    in
-                    Expect.equal
-                        True
-                        (validateInt policy 6)
-            , test "returns valid validator if it's less than given string" <|
-                \_ ->
-                    let
-                        policy =
-                            Validator.lte "5"
+                            Validator.lte 5
                     in
                     Expect.equal
                         True
@@ -103,25 +71,16 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.lte "1"
+                            Validator.lte 1
                     in
                     Expect.equal
                         True
                         (validateString policy "x")
-            , test "returns invalid validator if it's greater than given number" <|
-                \_ ->
-                    let
-                        policy =
-                            Validator.lte "-1"
-                    in
-                    Expect.equal
-                        False
-                        (validateInt policy 8)
             , test "returns invalid validator if it's greater than given string" <|
                 \_ ->
                     let
                         policy =
-                            Validator.lte "-1"
+                            Validator.lte -1
                     in
                     Expect.equal
                         False
@@ -253,8 +212,8 @@ suite =
                     let
                         policy =
                             Validator.required
-                                << Validator.gte "7"
-                                << Validator.lte "100"
+                                << Validator.gte 7
+                                << Validator.lte 100
                                 << Validator.mixSpecial
                                 << Validator.mixUppercase
                     in
@@ -266,8 +225,8 @@ suite =
                     let
                         policy =
                             Validator.required
-                                << Validator.gte "7"
-                                << Validator.lte "100"
+                                << Validator.gte 7
+                                << Validator.lte 100
                                 << Validator.mixSpecial
                                 << Validator.mixUppercase
                     in
