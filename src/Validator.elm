@@ -90,6 +90,7 @@ validate operator =
     validate required name == True
     validate required age == True
     validate required empty == False
+
 -}
 required : ValidatableInput -> ValidatableInput
 required input =
@@ -131,15 +132,16 @@ update op input =
     validate (gte "7") name == False
     validate (gte "17") 17 == True
     validate (gte "20") 17 == False
+
 -}
 gte : String -> ValidatableInput -> ValidatableInput
-gte str validation =
+gte str input =
     case String.toInt str of
         Ok n ->
-            update (gteValidator n) validation
+            update (gteValidator n) input
 
         Err _ ->
-            update (\_ -> False) validation
+            update (\_ -> False) input
 
 
 gteValidator : Int -> ValidatableInput -> Bool
@@ -161,15 +163,16 @@ gteValidator x y =
     validate (lte "-7") name == False
     validate (lte "17") 17 == True
     validate (lte "-20") 17 == False
+
 -}
 lte : String -> ValidatableInput -> ValidatableInput
-lte str validation =
+lte str input =
     case String.toInt str of
         Ok n ->
-            update (lteValidator n) validation
+            update (lteValidator n) input
 
         Err _ ->
-            update (\_ -> False) validation
+            update (\_ -> False) input
 
 
 lteValidator : Int -> ValidatableInput -> Bool
@@ -189,10 +192,11 @@ lteValidator x y =
 
     validate mixAlpha email == True
     validate mixAlpha age == False
+
 -}
 mixAlpha : ValidatableInput -> ValidatableInput
-mixAlpha validation =
-    mix (Regex.regex "[a-zA-Z]+") validation
+mixAlpha input =
+    mix (Regex.regex "[a-zA-Z]+") input
 
 
 {-| Validate if input contains numbers.
@@ -202,10 +206,11 @@ mixAlpha validation =
 
     validate mixNumeric validEmail == True
     validate mixNumeric invalidEmail == False
+
 -}
 mixNumeric : ValidatableInput -> ValidatableInput
-mixNumeric validation =
-    mix (Regex.regex "\\d+") validation
+mixNumeric input =
+    mix (Regex.regex "\\d+") input
 
 
 {-| Validate if input contains special characters.
@@ -215,10 +220,11 @@ mixNumeric validation =
 
     validate mixSpecial email == True
     validate mixSpecial age == False
+
 -}
 mixSpecial : ValidatableInput -> ValidatableInput
-mixSpecial validation =
-    mix (Regex.regex <| "[" ++ Regex.escape "!\"#$%&'()*+,-./\\:;?@[]^_`{|}~" ++ "]+") validation
+mixSpecial input =
+    mix (Regex.regex <| "[" ++ Regex.escape "!\"#$%&'()*+,-./\\:;?@[]^_`{|}~" ++ "]+") input
 
 
 {-| Validate if input contains lowercase.
@@ -228,10 +234,11 @@ mixSpecial validation =
 
     validate mixLowercase validEmail == True
     validate mixLowercase invalidEmail == False
+
 -}
 mixLowercase : ValidatableInput -> ValidatableInput
-mixLowercase validation =
-    mix (Regex.regex "[a-z]+") validation
+mixLowercase input =
+    mix (Regex.regex "[a-z]+") input
 
 
 {-| Validate if input contains uppercase.
@@ -241,15 +248,16 @@ mixLowercase validation =
 
     validate mixUppercase validEmail == True
     validate mixUppercase invalidEmail == False
+
 -}
 mixUppercase : ValidatableInput -> ValidatableInput
-mixUppercase validation =
-    mix (Regex.regex "[A-Z]+") validation
+mixUppercase input =
+    mix (Regex.regex "[A-Z]+") input
 
 
 mix : Regex.Regex -> ValidatableInput -> ValidatableInput
-mix regex validation =
-    update (mixValidator regex) validation
+mix regex input =
+    update (mixValidator regex) input
 
 
 mixValidator : Regex.Regex -> ValidatableInput -> Bool
