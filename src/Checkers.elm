@@ -1,4 +1,4 @@
-module Validator
+module Checkers
     exposing
         ( ValidatableInput
         , from

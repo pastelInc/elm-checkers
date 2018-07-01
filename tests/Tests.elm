@@ -1,15 +1,15 @@
 module Tests exposing (..)
 
+import Checkers
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, conditional, int, list, string)
 import Regex
 import Test exposing (..)
-import Validator
 
 
-validateString : (Validator.ValidatableInput String -> Validator.ValidatableInput String) -> String -> Bool
+validateString : (Checkers.ValidatableInput String -> Checkers.ValidatableInput String) -> String -> Bool
 validateString validator =
-    Validator.validate validator << Validator.from
+    Checkers.validate validator << Checkers.from
 
 
 validString : Fuzzer String
@@ -27,13 +27,13 @@ validString =
 
 suite : Test
 suite =
-    describe "The Validator module"
-        [ describe "Validator.gte"
+    describe "The Checkers module"
+        [ describe "Checkers.gte"
             [ test "returns valid validator if it's greater than given string" <|
                 \_ ->
                     let
                         policy =
-                            Validator.gte -1
+                            Checkers.gte -1
                     in
                     Expect.equal
                         True
@@ -42,7 +42,7 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.gte 1
+                            Checkers.gte 1
                     in
                     Expect.equal
                         True
@@ -51,18 +51,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.gte 7
+                            Checkers.gte 7
                     in
                     Expect.equal
                         False
                         (validateString policy "x")
             ]
-        , describe "Validator.lte"
+        , describe "Checkers.lte"
             [ test "returns valid validator if it's less than given string" <|
                 \_ ->
                     let
                         policy =
-                            Validator.lte 5
+                            Checkers.lte 5
                     in
                     Expect.equal
                         True
@@ -71,7 +71,7 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.lte 1
+                            Checkers.lte 1
                     in
                     Expect.equal
                         True
@@ -80,18 +80,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.lte -1
+                            Checkers.lte -1
                     in
                     Expect.equal
                         False
                         (validateString policy "y")
             ]
-        , describe "Validator.mixAlpha"
+        , describe "Checkers.mixAlpha"
             [ test "returns valid validator if it contains alphabet" <|
                 \_ ->
                     let
                         policy =
-                            Validator.mixAlpha
+                            Checkers.mixAlpha
                     in
                     Expect.equal
                         True
@@ -100,18 +100,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.mixAlpha
+                            Checkers.mixAlpha
                     in
                     Expect.equal
                         False
                         (validateString policy "765")
             ]
-        , describe "Validator.mixLowercase"
+        , describe "Checkers.mixLowercase"
             [ test "returns valid validator if it contains lowercase" <|
                 \_ ->
                     let
                         policy =
-                            Validator.mixLowercase
+                            Checkers.mixLowercase
                     in
                     Expect.equal
                         True
@@ -120,18 +120,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.mixLowercase
+                            Checkers.mixLowercase
                     in
                     Expect.equal
                         False
                         (validateString policy "A1B2C")
             ]
-        , describe "Validator.mixUppercase"
+        , describe "Checkers.mixUppercase"
             [ test "returns valid validator if it contains uppercase" <|
                 \_ ->
                     let
                         policy =
-                            Validator.mixUppercase
+                            Checkers.mixUppercase
                     in
                     Expect.equal
                         True
@@ -140,18 +140,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.mixUppercase
+                            Checkers.mixUppercase
                     in
                     Expect.equal
                         False
                         (validateString policy "a1b2c")
             ]
-        , describe "Validator.mixNumeric"
+        , describe "Checkers.mixNumeric"
             [ test "returns valid validator if it contains numeric" <|
                 \_ ->
                     let
                         policy =
-                            Validator.mixNumeric
+                            Checkers.mixNumeric
                     in
                     Expect.equal
                         True
@@ -160,18 +160,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.mixNumeric
+                            Checkers.mixNumeric
                     in
                     Expect.equal
                         False
                         (validateString policy "abc")
             ]
-        , describe "Validator.mixSpecial"
+        , describe "Checkers.mixSpecial"
             [ test "returns valid validator if it contains special characters" <|
                 \_ ->
                     let
                         policy =
-                            Validator.mixSpecial
+                            Checkers.mixSpecial
                     in
                     Expect.equal
                         True
@@ -180,18 +180,18 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.mixSpecial
+                            Checkers.mixSpecial
                     in
                     Expect.equal
                         False
                         (validateString policy "a b c")
             ]
-        , describe "Validator.required"
+        , describe "Checkers.required"
             [ test "returns valid validator if it contains some characters" <|
                 \_ ->
                     let
                         policy =
-                            Validator.required
+                            Checkers.required
                     in
                     Expect.equal
                         True
@@ -200,7 +200,7 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.required
+                            Checkers.required
                     in
                     Expect.equal
                         False
@@ -211,11 +211,11 @@ suite =
                 \str ->
                     let
                         policy =
-                            Validator.required
-                                << Validator.gte 7
-                                << Validator.lte 100
-                                << Validator.mixSpecial
-                                << Validator.mixUppercase
+                            Checkers.required
+                                << Checkers.gte 7
+                                << Checkers.lte 100
+                                << Checkers.mixSpecial
+                                << Checkers.mixUppercase
                     in
                     Expect.equal
                         True
@@ -224,11 +224,11 @@ suite =
                 \_ ->
                     let
                         policy =
-                            Validator.required
-                                << Validator.gte 7
-                                << Validator.lte 100
-                                << Validator.mixSpecial
-                                << Validator.mixUppercase
+                            Checkers.required
+                                << Checkers.gte 7
+                                << Checkers.lte 100
+                                << Checkers.mixSpecial
+                                << Checkers.mixUppercase
                     in
                     Expect.equal
                         False
